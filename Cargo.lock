@@ -634,13 +634,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ruax"
-version = "0.1.0"
-dependencies = [
- "rxrust",
-]
-
-[[package]]
 name = "rustix"
 version = "0.37.27"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -665,6 +658,13 @@ dependencies = [
  "libc",
  "linux-raw-sys 0.4.13",
  "windows-sys 0.52.0",
+]
+
+[[package]]
+name = "ruxt"
+version = "0.1.0"
+dependencies = [
+ "rxrust",
 ]
 
 [[package]]
