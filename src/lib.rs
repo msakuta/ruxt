@@ -1,46 +1,37 @@
 use std::{cell::RefCell, rc::Rc};
 
-
-
-fn main() {
-    let numbers = IterObservable::from_iter(0..10);
-    let even = numbers.clone().filter(|v| v % 2 == 0);
-    let odd = numbers.clone().filter(|v| v % 2 != 0);
-    even.subscribe(Rc::new(|val| print!("{} ", val)));
-    odd.subscribe(Rc::new(|val| print!("{} ", val)));
-
-    numbers.run();
-}
-
-trait Observable<U> {
+pub trait Observable<U> {
     // fn subscribers(&self) -> &[Rc<dyn Fn()>];
     fn subscribe(&self, f: Rc<dyn Fn(U)>);
 }
 
-struct IterObservableInt<T, U> {
+pub struct IterObservableInt<T, U> {
     iter: RefCell<T>,
     subscribers: RefCell<Vec<Rc<dyn Fn(U)>>>,
 }
 
 #[derive(Clone)]
-struct IterObservable<T, U>(Rc<IterObservableInt<T, U>>);
+pub struct IterObservable<T, U>(Rc<IterObservableInt<T, U>>);
 
 impl<U: Clone + 'static, T: Iterator<Item = U> + 'static> IterObservable<T, U> {
-    fn from_iter(iter: T) -> Self {
+    pub fn from_iter(iter: T) -> Self {
         Self(Rc::new(IterObservableInt {
             iter: RefCell::new(iter),
             subscribers: RefCell::new(vec![]),
         }))
     }
 
-    fn filter(self, f: impl Fn(&U) -> bool + 'static) -> Rc<FilterObservable<U>> {
+    pub fn filter(self, f: impl Fn(&U) -> bool + 'static) -> Rc<FilterObservable<U>> {
         let ret = Rc::new(FilterObservable::new(self.0.clone(), Box::new(f)));
         let sub = ret.clone();
-        self.0.subscribers.borrow_mut().push(Rc::new(move |val| sub.call(val)));
+        self.0
+            .subscribers
+            .borrow_mut()
+            .push(Rc::new(move |val| sub.call(val)));
         ret
     }
 
-    fn run(&self) {
+    pub fn run(&self) {
         for val in &mut *self.0.iter.borrow_mut() {
             for sub in self.0.subscribers.borrow().iter() {
                 sub(val.clone());
@@ -59,7 +50,7 @@ impl<T, U> Observable<U> for IterObservableInt<T, U> {
     }
 }
 
-struct FilterObservable<U> {
+pub struct FilterObservable<U> {
     // observable: Rc<dyn Observable<U>>,
     filter: Box<dyn Fn(&U) -> bool>,
     subscribers: RefCell<Vec<Rc<dyn Fn(U)>>>,
